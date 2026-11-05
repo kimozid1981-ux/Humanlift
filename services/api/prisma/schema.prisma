@@ -73,11 +73,12 @@ model User {
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
 
-  roles         UserRole[]
-  sessions      Session[]
-  tokens        OneTimeToken[]
-  dataRequests  DataRequest[]  @relation("requester")
-  handledDataRequests DataRequest[] @relation("handler")
+  roles               UserRole[]
+  sessions            Session[]
+  tokens              OneTimeToken[]
+  dataRequests        DataRequest[]       @relation("requester")
+  handledDataRequests DataRequest[]       @relation("handler")
+  assistanceRequests  AssistanceRequest[]
 }
 
 model UserRole {
@@ -170,22 +171,23 @@ model AbuseReport {
 }
 
 model Country {
-  code                String              @id @db.Char(2)
-  name                String
-  availability        CountryAvailability @default(NOT_RESEARCHED)
-  languages           String[]
-  currencies          String[]
-  complianceOwner     String?
-  legalSignOffBy      String?
-  legalSignOffAt      DateTime?
-  legalSignOffRef     String?
-  paymentSignOffBy    String?
-  paymentSignOffAt    DateTime?
-  paymentSignOffRef   String?
-  notes               String?
-  lastReviewedAt      DateTime?
-  nextReviewAt        DateTime?
-  updatedAt           DateTime            @updatedAt
+  code               String              @id @db.Char(2)
+  name               String
+  availability       CountryAvailability @default(NOT_RESEARCHED)
+  languages          String[]
+  currencies         String[]
+  complianceOwner    String?
+  legalSignOffBy     String?
+  legalSignOffAt     DateTime?
+  legalSignOffRef    String?
+  paymentSignOffBy   String?
+  paymentSignOffAt   DateTime?
+  paymentSignOffRef  String?
+  notes              String?
+  lastReviewedAt     DateTime?
+  nextReviewAt       DateTime?
+  updatedAt          DateTime            @updatedAt
+  assistanceRequests AssistanceRequest[]
 }
 
 /// Development/test only: the sandbox mailer writes here instead of sending email.
@@ -195,4 +197,87 @@ model DevOutboxEmail {
   subject   String
   body      String
   createdAt DateTime @default(now())
+}
+
+// ---- Assistance requests (Milestone 3, test mode: no money moves) ----------
+
+enum RequestCategory {
+  HOUSING
+  ENERGY
+  WATER
+  FOOD
+  EDUCATION
+  TRANSPORT
+  HEALTHCARE
+  FAMILY_EMERGENCY
+  OTHER
+}
+
+enum RequestStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  PUBLISHED
+  PARTIALLY_FUNDED
+  FULLY_FUNDED
+  PAYMENT_PROCESSING
+  PAID_TO_CREDITOR
+  CLOSED
+  REJECTED
+  SUSPENDED
+  CANCELLED
+}
+
+enum RequestDisplayMode {
+  ANONYMOUS
+  DISPLAY_NAME
+}
+
+model AssistanceRequest {
+  id                   String             @id @default(uuid()) @db.Uuid
+  applicantId          String             @db.Uuid
+  title                String
+  summary              String
+  category             RequestCategory
+  countryCode          String             @db.Char(2)
+  currency             String             @db.Char(3)
+  /// Integer minor units (e.g. cents). Never floating point.
+  amountRequestedMinor Int
+  /// Stays 0 until regulated payments exist.
+  amountFundedMinor    Int                @default(0)
+  deadline             DateTime?
+  displayMode          RequestDisplayMode @default(ANONYMOUS)
+  publicDisplayName    String?
+  /// Set only by the applicant's explicit consent; required for any public status.
+  publicConsentAt      DateTime?
+  status               RequestStatus      @default(DRAFT)
+  /// Plain-language reason shown to the applicant after "changes requested", rejection or suspension.
+  lastDecisionNote     String?
+  submittedAt          DateTime?
+  publishedAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  applicant User                  @relation(fields: [applicantId], references: [id], onDelete: Restrict)
+  country   Country               @relation(fields: [countryCode], references: [code])
+  history   RequestStatusChange[]
+
+  @@index([status, countryCode, category])
+  @@index([applicantId])
+}
+
+/// One row per status change. Rows can never be edited (database trigger).
+model RequestStatusChange {
+  id         BigInt         @id @default(autoincrement())
+  requestId  String         @db.Uuid
+  fromStatus RequestStatus?
+  toStatus   RequestStatus
+  actorId    String?        @db.Uuid
+  reason     String?
+  occurredAt DateTime       @default(now())
+
+  request AssistanceRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
 }

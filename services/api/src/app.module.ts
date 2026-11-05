@@ -14,6 +14,8 @@ import { AdminAuthController } from './admin/admin-auth.controller';
 import { AdminController } from './admin/admin.controller';
 import { DevController } from './dev/dev.controller';
 import { HealthController } from './health.controller';
+import { AdminRequestsController, MyRequestsController, PublicRequestsController } from './requests/requests.controller';
+import { RequestsService } from './requests/requests.service';
 
 @Module({})
 export class AppModule {
@@ -21,7 +23,7 @@ export class AppModule {
     return {
       module: AppModule,
       imports: [ThrottlerModule.forRoot({ throttlers: [{ name: 'default', ttl: 60_000, limit: 300 }] })],
-      controllers: [HealthController, AuthController, UsersController, PublicController, AdminAuthController, AdminController, DevController],
+      controllers: [HealthController, AuthController, UsersController, PublicController, AdminAuthController, AdminController, DevController, MyRequestsController, AdminRequestsController, PublicRequestsController],
       providers: [
         { provide: CONFIG, useValue: config },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
@@ -30,6 +32,7 @@ export class AppModule {
         // Real SMTP delivery when SMTP_URL is set (required in staging/production), sandbox outbox otherwise.
         { provide: MAILER, useClass: mailerFor(config) },
         AuthService,
+        RequestsService,
         MemberGuard,
         StaffGuard,
         StaffPasswordGuard,

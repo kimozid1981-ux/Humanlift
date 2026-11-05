@@ -10,6 +10,7 @@ import { ZodPipe } from '../common/zod.pipe';
 import { AuthedRequest } from '../common/request';
 import { countryCode, displayName, locale, password } from '../common/schemas';
 import { presentSelf } from './present';
+import { presentOwn } from '../requests/requests.service';
 
 const profileSchema = z
   .object({ displayName: displayName.optional(), locale: locale.optional(), countryCode: countryCode.nullable().optional() })
@@ -61,13 +62,14 @@ export class UsersController {
   @Get('export')
   async exportData(@Req() req: AuthedRequest) {
     const me = req.auth!.user;
-    const [sessions, dataRequests, auditEntries] = await Promise.all([
+    const [sessions, dataRequests, auditEntries, assistanceRequests] = await Promise.all([
       this.prisma.session.findMany({ where: { userId: me.id }, select: { createdAt: true, expiresAt: true, revokedAt: true, ipAddress: true, userAgent: true } }),
       this.prisma.dataRequest.findMany({ where: { userId: me.id }, select: { type: true, status: true, details: true, resolution: true, createdAt: true } }),
       this.prisma.auditLog.findMany({ where: { actorId: me.id }, select: { occurredAt: true, action: true, ipAddress: true }, orderBy: { occurredAt: 'asc' } }),
+      this.prisma.assistanceRequest.findMany({ where: { applicantId: me.id }, orderBy: { createdAt: 'asc' } }),
     ]);
     await this.audit.record({ actorId: me.id, action: 'user.data_exported', targetType: 'User', targetId: me.id, ipAddress: req.ip });
-    return { generatedAt: new Date().toISOString(), profile: presentSelf(me), sessions, dataRequests, activity: auditEntries };
+    return { generatedAt: new Date().toISOString(), profile: presentSelf(me), sessions, dataRequests, assistanceRequests: assistanceRequests.map(presentOwn), activity: auditEntries };
   }
 
   @Get('data-requests')
