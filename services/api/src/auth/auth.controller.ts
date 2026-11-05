@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { AuthService, ClientInfo } from './auth.service';
 import { MemberGuard } from './guards';
 import { clearSessionCookie, setSessionCookie } from './cookies';
-import { SESSION_COOKIE } from './roles';
+import { isMobileClient, memberToken } from './roles';
 import { AppConfig, CONFIG } from '../config';
 import { ZodPipe } from '../common/zod.pipe';
 import { AuthedRequest, clientIp } from '../common/request';
@@ -38,6 +38,13 @@ export class AuthController {
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
+  /** Web: HttpOnly cookie. Mobile app: token in the body, stored by the app in the OS secure storage. */
+  private deliverSession(req: Request, res: Response, token: string, user: ReturnType<typeof presentSelf>) {
+    if (isMobileClient(req)) return { user, sessionToken: token };
+    setSessionCookie(res, 'member', token, this.config);
+    return { user };
+  }
+
   @Post('register')
   @SensitiveRateLimit()
   async register(
@@ -46,8 +53,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user, token } = await this.auth.register(body, clientInfo(req));
-    setSessionCookie(res, 'member', token, this.config);
-    return { user: presentSelf(user) };
+    return this.deliverSession(req, res, token, presentSelf(user));
   }
 
   @Post('login')
@@ -59,14 +65,13 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user, token } = await this.auth.login(body.email, body.password, 'member', clientInfo(req));
-    setSessionCookie(res, 'member', token, this.config);
-    return { user: presentSelf(user) };
+    return this.deliverSession(req, res, token, presentSelf(user));
   }
 
   @Post('logout')
   @HttpCode(204)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    await this.auth.logout(req.cookies?.[SESSION_COOKIE.member], clientInfo(req));
+    await this.auth.logout(memberToken(req), clientInfo(req));
     clearSessionCookie(res, 'member', this.config);
   }
 

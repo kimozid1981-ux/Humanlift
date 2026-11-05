@@ -12,6 +12,7 @@ HumanLift will connect people facing an essential bill with people who want to h
 |---|---|
 | `apps/web` | Public website + applicant/donor web app (Next.js, English and French) |
 | `apps/admin` | Staff administration dashboard (Next.js) |
+| `apps/mobile` | Android and iPhone app (Flutter, English and French). See [apps/mobile/README.md](apps/mobile/README.md) |
 | `services/api` | Backend API (NestJS), database schema and migrations (Prisma, PostgreSQL) |
 | `docs/` | Audit and plan, project records, guides |
 | `.github/workflows` | Continuous integration |

@@ -3,7 +3,14 @@ import { createSuperAdmin, totp, uniqueEmail } from './helpers';
 
 const ADMIN = 'http://localhost:3001';
 
-test('super administrator: sign-in with MFA enrolment, review queues, country approval is refused without sign-off', async ({ page }) => {
+test('super administrator: sign-in with MFA enrolment, review queues, country approval is refused without sign-off', async ({ page, request }) => {
+  // This test sends its own contact message so it does not depend on other tests running first.
+  const marker = `Admin queue check ${Date.now()}`;
+  const sent = await request.post('http://localhost:4000/v1/public/contact', {
+    data: { name: 'Queue Check', email: uniqueEmail('contact'), topic: 'general', message: marker },
+  });
+  expect(sent.ok()).toBeTruthy();
+
   const email = uniqueEmail('superadmin');
   const password = createSuperAdmin(email);
 
@@ -30,7 +37,7 @@ test('super administrator: sign-in with MFA enrolment, review queues, country ap
   // Contact messages and abuse reports from the public site are visible.
   await page.getByRole('link', { name: 'Contact messages' }).click();
   await expect(page.getByRole('heading', { name: 'Contact messages' })).toBeVisible();
-  await expect(page.locator('table')).toContainText(/E2E contact message|No messages/);
+  await expect(page.locator('table')).toContainText(marker);
   await page.getByRole('link', { name: 'Abuse reports' }).click();
   await expect(page.getByRole('heading', { name: 'Abuse reports' })).toBeVisible();
 

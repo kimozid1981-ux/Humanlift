@@ -11,15 +11,15 @@ import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { AuthedRequest } from '../common/request';
-import { isStaff, SESSION_COOKIE } from './roles';
+import { isStaff, memberToken, SESSION_COOKIE } from './roles';
 
-/** Requires a signed-in member (applicant/donor web app) session. */
+/** Requires a signed-in member session (web cookie, or bearer token from the mobile app). */
 @Injectable()
 export class MemberGuard implements CanActivate {
   constructor(@Inject(AuthService) private readonly auth: AuthService) {}
   async canActivate(ctx: ExecutionContext) {
     const req = ctx.switchToHttp().getRequest<AuthedRequest>();
-    const resolved = await this.auth.resolveSession(req.cookies?.[SESSION_COOKIE.member], 'member');
+    const resolved = await this.auth.resolveSession(memberToken(req), 'member');
     if (!resolved) throw new UnauthorizedException({ error: 'not_signed_in' });
     req.auth = resolved;
     return true;

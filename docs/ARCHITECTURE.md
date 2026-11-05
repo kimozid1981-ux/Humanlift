@@ -5,13 +5,17 @@
 ## As built (Milestone 1)
 
 ```
-Browser ──► apps/web   (Next.js 15, :3000) ──/api/* proxy──┐
-Staff   ──► apps/admin (Next.js 15, :3001) ──/api/* proxy──┼──► services/api (NestJS 11, :4000, /v1) ──► PostgreSQL 16
-                                                             │         └─ SandboxMailer → DevOutboxEmail table (dev/test only)
+Browser ──► apps/web    (Next.js 15, :3000) ── /api/* proxy ──┐
+Staff   ──► apps/admin  (Next.js 15, :3001) ── /api/* proxy ──┤
+Phone   ──► apps/mobile (Flutter, Android + iOS) ─ Bearer ────┤
+                                                              ▼
+                     services/api (NestJS 11, :4000, /v1) ──► PostgreSQL 16
+                       └─ SandboxMailer → DevOutboxEmail table (dev/test only)
 ```
 
 - **Same-origin proxy:** each web app forwards `/api/*` to the API, so session cookies are first-party `HttpOnly` cookies and the API needs no CORS.
 - **Two cookie names:** `hl_session` (members) and `hl_admin_session` (staff). A staff session is only valid on admin endpoints and only after MFA.
+- **Mobile sessions:** the app sends `X-HumanLift-Client: mobile`; the API then returns the session token in the response body instead of a cookie, and accepts `Authorization: Bearer <token>`. The server still stores only the token's hash. The app keeps the token in Keychain (iOS) / Keystore (Android).
 - **API versioning:** every route is under `/v1`.
 - **Authorisation:** guards in `services/api/src/auth/guards.ts`. Admin endpoints are deny-by-default: each must declare allowed roles.
 - **Validation:** every request body is validated with zod (`common/zod.pipe.ts`) and returns field-level errors.
@@ -24,7 +28,7 @@ Staff   ──► apps/admin (Next.js 15, :3001) ──/api/* proxy──┼─�
 | Env | Status |
 |---|---|
 | development (local) | Working — see guides/local-development.md |
-| test (CI) | GitHub Actions workflow `.github/workflows/ci.yml`; first run happens on the PR |
+| test (CI) | `.github/workflows/ci.yml` (API + web + admin) and `.github/workflows/mobile.yml` (Flutter checks, Android test APK; iPhone build on demand) |
 | staging / production | Do not exist. Need a hosting decision and founder approval |
 
 ## Known technical debt

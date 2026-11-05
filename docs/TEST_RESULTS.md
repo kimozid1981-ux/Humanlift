@@ -43,10 +43,32 @@ Note: the server log prints `Error: Internal: NoFallbackError` during the 404 te
 
 `pnpm audit --prod` initially reported 58 advisories (4 critical, 29 high) in pinned framework versions. After upgrading Next.js to 15.5.29, NestJS to 11.2.8, zod to 4.6.7 and overriding multer, postcss, deepmerge-ts and sharp: `No known vulnerabilities found`.
 
-### CI pipeline — NOT TESTED yet
+### CI pipeline — FAILED, then fixed (re-run pending)
 
-`.github/workflows/ci.yml` has not run yet; it will run on the pull request. Result to be recorded here.
+First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42107799254)): install, audit, migrations, API tests and builds passed; **1 of 44 browser tests FAILED**. The admin test expected a contact message that another test creates later; on GitHub the tests ran in a different order. Fix: the admin test now sends its own message first. After the fix, the full browser suite was re-run locally in CI mode on a database that already held API-test data: **44 passed**. The GitHub re-run result will be recorded here.
+
+## Run 2026-11-05 — Mobile app (Flutter)
+
+**Environment:** same cloud container, Flutter 3.47.7 / Dart 3.13, Linux. No Android SDK (download blocked here), no macOS.
+
+### Static analysis — VERIFIED
+`flutter analyze`: `No issues found!`
+
+### Widget tests — VERIFIED (13 passed)
+`flutter test` against a fake API (no real server, no real phone): welcome screen and test banner; French locale; registration validation (role, terms, 12-character password, nothing sent while invalid); registration stores the token in secure storage and sends `X-HumanLift-Client: mobile`; profile name edit and adding the applicant role; privacy request and duplicate refusal; sign out clears the token, wrong password shows a generic error, sign in works; saved session restored on start; clear network-error message; contact form; Android and iOS tap-target and text-contrast guidelines; layout at 200% text size; privacy cover when the app leaves the foreground.
+
+### API support for the app — VERIFIED
+`services/api/test/mobile.e2e.test.ts` (part of the 37 API tests): mobile registration returns a token and sets no cookie; the bearer token works on member endpoints; logout revokes it.
+
+### Android debug APK build — NOT TESTED yet
+Runs on GitHub (`.github/workflows/mobile.yml`) on the next push. Result to be recorded here.
+
+### iPhone build — NOT TESTED
+Unsigned build is available as a manual GitHub job on macOS. Not run yet (uses paid-rate macOS minutes; run it from the Actions tab when wanted).
+
+### On a real device, emulator or simulator — NOT TESTED
+Needs Android Studio or Xcode on a computer, or a phone with developer mode. See `apps/mobile/README.md`.
 
 ### NOT TESTED (features not built)
 
-Load/performance, mobile apps, real screen readers, real email delivery, payments, verification, backups/restore, penetration testing, other browsers (Firefox, Safari).
+Load/performance, mobile apps on real devices, real screen readers (web and mobile), real email delivery, payments, verification, backups/restore, penetration testing, other browsers (Firefox, Safari).

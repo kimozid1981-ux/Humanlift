@@ -22,4 +22,8 @@ Argon2id password hashing · hashed session tokens · HttpOnly/SameSite cookies 
 | S10 | IP addresses stored in sessions and audit log are personal data | Privacy | Define retention (e.g. truncate after N months) in data map |
 | S11 | No independent security review | High (pre-launch) | Pen test before real money (founder approval for cost) |
 
+| S12 | Mobile session token can be read on a rooted/jailbroken phone despite Keychain/Keystore | Medium | Consider device-integrity checks (Play Integrity, App Attest) before real money |
+| S13 | iPhone: screenshots are not blocked (only the app-switcher preview is covered) | Low–Medium | Review when sensitive screens (documents, addresses) are added |
+| S14 | Mobile app has no certificate pinning | Low–Medium | Decide with the hosting choice; pinning adds rotation risk |
+
 **A scanner reporting no findings is not a security audit.** Independent expert review is required before production.

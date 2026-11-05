@@ -13,4 +13,6 @@ Things only Karim can do or decide. **Last updated:** 2026-11-05.
 | F7 | Choose and approve a hosting provider (EU region) | Needed for a shareable test environment | Staging, beta | Open |
 | F8 | Approve a transactional email provider (free tier possible) | Real emails in staging | Staging | Open |
 | F9 | Trademark/domain check for "HumanLift" | Avoid rebranding later | Branding, store listings | Open |
-| F10 | Provide a Mac with Xcode or approve a cloud macOS build service; install Flutter | iOS builds need macOS | Mobile (M5) | Open |
+| F10 | Try the Android test app: download `humanlift-android-debug-apk` from the latest "Mobile app" run in GitHub Actions and install it on an Android phone or emulator (it needs the API running somewhere it can reach) | First check on a real device | Mobile beta | Open |
+| F11 | Decide whether to open Apple Developer (USD 99/year) and Google Play Console (USD 25 one-off) accounts; prices to be confirmed on their sites before paying | Needed to install the iPhone app on real phones and to publish anywhere | Mobile beta, store release | Open |
+| F12 | Confirm the app ID (`org.humanlift.humanlift` today) once the domain is decided (see F9) | It cannot be changed after the first store upload | Store release | Open |

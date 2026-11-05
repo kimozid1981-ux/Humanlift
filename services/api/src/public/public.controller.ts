@@ -5,7 +5,7 @@ import { AuditService } from '../audit/audit.service';
 import { AuthService } from '../auth/auth.service';
 import { ZodPipe } from '../common/zod.pipe';
 import { email, locale } from '../common/schemas';
-import { SESSION_COOKIE } from '../auth/roles';
+import { memberToken } from '../auth/roles';
 import { SensitiveRateLimit } from '../common/throttle';
 import type { Request } from 'express';
 
@@ -52,7 +52,7 @@ export class PublicController {
   async report(@Body(new ZodPipe(abuseSchema)) body: z.infer<typeof abuseSchema>, @Req() req: Request) {
     const { website: _hp, ...data } = body;
     // Link the report to the reporter's account if they are signed in.
-    const session = await this.auth.resolveSession(req.cookies?.[SESSION_COOKIE.member], 'member');
+    const session = await this.auth.resolveSession(memberToken(req), 'member');
     const report = await this.prisma.abuseReport.create({
       data: { ...data, reporterId: session?.user.id, reporterEmail: data.reporterEmail ?? session?.user.email },
     });
