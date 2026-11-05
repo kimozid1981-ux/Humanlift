@@ -1,0 +1,198 @@
+// HumanLift database schema — Milestone 1.
+// See docs/audit/02-database.md for the full planned design.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  APPLICANT
+  DONOR
+  VERIFICATION_SPECIALIST
+  COMPLIANCE_SPECIALIST
+  ADMINISTRATOR
+  SUPER_ADMINISTRATOR
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_DELETION
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+enum DataRequestType {
+  ACCESS
+  CORRECTION
+  DELETION
+}
+
+enum DataRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum ReportStatus {
+  OPEN
+  IN_REVIEW
+  CLOSED
+}
+
+enum CountryAvailability {
+  NOT_RESEARCHED
+  RESEARCH_IN_PROGRESS
+  LEGAL_REVIEW_REQUIRED
+  PAYMENT_REVIEW_REQUIRED
+  APPROVED_FOR_BETA
+  APPROVED_FOR_LAUNCH
+  SUSPENDED
+}
+
+model User {
+  id              String     @id @default(uuid()) @db.Uuid
+  email           String     @unique
+  passwordHash    String
+  displayName     String
+  locale          String     @default("en")
+  countryCode     String?    @db.Char(2)
+  status          UserStatus @default(ACTIVE)
+  emailVerifiedAt DateTime?
+  mfaSecretEnc    String?
+  mfaEnabledAt    DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  roles         UserRole[]
+  sessions      Session[]
+  tokens        OneTimeToken[]
+  dataRequests  DataRequest[]  @relation("requester")
+  handledDataRequests DataRequest[] @relation("handler")
+}
+
+model UserRole {
+  userId    String   @db.Uuid
+  role      Role
+  grantedAt DateTime @default(now())
+  grantedBy String?  @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, role])
+}
+
+model Session {
+  id            String    @id @default(uuid()) @db.Uuid
+  userId        String    @db.Uuid
+  tokenHash     String    @unique
+  isStaff       Boolean   @default(false)
+  mfaVerifiedAt DateTime?
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model OneTimeToken {
+  id        String       @id @default(uuid()) @db.Uuid
+  userId    String       @db.Uuid
+  purpose   TokenPurpose
+  tokenHash String       @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime     @default(now())
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Append-only. UPDATE and DELETE are rejected by a database trigger (see migration).
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  occurredAt DateTime @default(now())
+  actorId    String?  @db.Uuid
+  action     String
+  targetType String?
+  targetId   String?
+  ipAddress  String?
+  metadata   Json?
+
+  @@index([actorId])
+  @@index([action])
+  @@index([occurredAt])
+}
+
+model DataRequest {
+  id          String            @id @default(uuid()) @db.Uuid
+  userId      String            @db.Uuid
+  type        DataRequestType
+  status      DataRequestStatus @default(RECEIVED)
+  details     String?
+  handledById String?           @db.Uuid
+  resolution  String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  user        User              @relation("requester", fields: [userId], references: [id], onDelete: Cascade)
+  handledBy   User?             @relation("handler", fields: [handledById], references: [id])
+}
+
+model ContactMessage {
+  id        String       @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  topic     String
+  message   String
+  locale    String
+  status    ReportStatus @default(OPEN)
+  createdAt DateTime     @default(now())
+}
+
+model AbuseReport {
+  id            String       @id @default(uuid()) @db.Uuid
+  reporterId    String?      @db.Uuid
+  reporterEmail String?
+  category      String
+  targetUrl     String?
+  description   String
+  status        ReportStatus @default(OPEN)
+  createdAt     DateTime     @default(now())
+}
+
+model Country {
+  code                String              @id @db.Char(2)
+  name                String
+  availability        CountryAvailability @default(NOT_RESEARCHED)
+  languages           String[]
+  currencies          String[]
+  complianceOwner     String?
+  legalSignOffBy      String?
+  legalSignOffAt      DateTime?
+  legalSignOffRef     String?
+  paymentSignOffBy    String?
+  paymentSignOffAt    DateTime?
+  paymentSignOffRef   String?
+  notes               String?
+  lastReviewedAt      DateTime?
+  nextReviewAt        DateTime?
+  updatedAt           DateTime            @updatedAt
+}
+
+/// Development/test only: the sandbox mailer writes here instead of sending email.
+model DevOutboxEmail {
+  id        String   @id @default(uuid()) @db.Uuid
+  to        String
+  subject   String
+  body      String
+  createdAt DateTime @default(now())
+}
