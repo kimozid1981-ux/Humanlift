@@ -47,4 +47,4 @@ The brief (section 26) asks for fifteen items, A to O. They are split into short
 
 ## What has been built so far
 
-Milestone 1 (functional foundation) is in this pull request. See [../milestones/milestone-1-report.md](../milestones/milestone-1-report.md) for what works, what was tested and what remains.
+Milestone 1 (functional foundation) is in this pull request. See [../milestones/milestone-1-report.md](../milestones/milestone-1-report.md) and [../PROJECT_STATUS.md](../PROJECT_STATUS.md) for what works, what was tested and what remains.
