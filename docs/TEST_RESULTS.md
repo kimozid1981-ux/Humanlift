@@ -43,9 +43,9 @@ Note: the server log prints `Error: Internal: NoFallbackError` during the 404 te
 
 `pnpm audit --prod` initially reported 58 advisories (4 critical, 29 high) in pinned framework versions. After upgrading Next.js to 15.5.29, NestJS to 11.2.8, zod to 4.6.7 and overriding multer, postcss, deepmerge-ts and sharp: `No known vulnerabilities found`.
 
-### CI pipeline — FAILED, then fixed (re-run pending)
+### CI pipeline — VERIFIED after one fix
 
-First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42107799254)): install, audit, migrations, API tests and builds passed; **1 of 44 browser tests FAILED**. The admin test expected a contact message that another test creates later; on GitHub the tests ran in a different order. Fix: the admin test now sends its own message first. After the fix, the full browser suite was re-run locally in CI mode on a database that already held API-test data: **44 passed**. The GitHub re-run result will be recorded here.
+First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42107799254)): install, audit, migrations, API tests and builds passed; **1 of 44 browser tests FAILED**. The admin test expected a contact message that another test creates later; on GitHub the tests ran in a different order. Fix: the admin test now sends its own message first. After the fix, the full browser suite was re-run locally in CI mode on a database that already held API-test data: **44 passed**. GitHub re-run on commit d9d6a86 ([run 42111653135](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42111653135)): **passed**.
 
 ## Run 2026-11-05 — Mobile app (Flutter)
 
@@ -60,8 +60,8 @@ First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-u
 ### API support for the app — VERIFIED
 `services/api/test/mobile.e2e.test.ts` (part of the 37 API tests): mobile registration returns a token and sets no cookie; the bearer token works on member endpoints; logout revokes it.
 
-### Android debug APK build — NOT TESTED yet
-Runs on GitHub (`.github/workflows/mobile.yml`) on the next push. Result to be recorded here.
+### Android debug APK build — VERIFIED (builds; not installed on a device)
+GitHub run on commit d9d6a86 ([run 42111653279](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42111653279)): `flutter analyze`, `flutter test` and `flutter build apk --debug` passed. The APK is attached to the run as `humanlift-android-debug-apk` (kept 14 days).
 
 ### iPhone build — NOT TESTED
 Unsigned build is available as a manual GitHub job on macOS. Not run yet (uses paid-rate macOS minutes; run it from the Actions tab when wanted).
