@@ -10,6 +10,7 @@
 - API (NestJS + Prisma + PostgreSQL 16) runs; 37 automated API tests pass (including 3 for mobile sign-in).
 - Website + web app (Next.js, EN/FR) and admin dashboard (Next.js) build and run; 44 Playwright browser tests pass in Chromium (desktop + one mobile viewport).
 - Mobile app (Flutter 3.47.7, one code base for Android and iPhone): `flutter analyze` clean; 13 automated screen tests pass against a fake server. **Not yet run on a real phone, emulator or simulator** (this environment cannot download the Android SDK, and iPhone builds need macOS). GitHub builds an Android test APK on each pull request.
+- Production setup (containers + one-command deployment) built and tested in a sandbox in production mode: sign-up through the website, a real email delivered over SMTP (to a local test mail server), email confirmation, mobile sign-in, admin creation and staff sign-in. **Not yet run on a real server.** See guides/go-live.md.
 - Dependency audit (`pnpm audit --prod`): no known vulnerabilities after upgrades and overrides on 2026-11-05.
 
 ## What a person can do today (locally / in a test environment)
@@ -18,7 +19,7 @@ Register (applicant, donor or both), confirm email (sandbox outbox), sign in/out
 
 ## Not built yet (NOT TESTED because it does not exist)
 
-Identity/address verification, document upload, OCR, assistance requests, donor discovery, payments, ledger, notifications other than sandbox email, AI features, store releases of the mobile app, the 1,000-persona evaluator harness, hosting/staging/production, monitoring, backups.
+Identity/address verification, document upload, OCR, assistance requests, donor discovery, payments, ledger, notifications other than sandbox email, AI features, store releases of the mobile app, the 1,000-persona evaluator harness, a running staging or production server, monitoring, tested backups.
 
 ## Blockers
 

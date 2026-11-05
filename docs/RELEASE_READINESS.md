@@ -11,7 +11,7 @@
 | Country launch approval | None approved | — | — | Enforced in code |
 | Legal notices present | Drafts only | — | — | Need lawyer |
 | Accessibility | Automated checks pass on 8 pages | — | — | No manual / user testing |
-| Backups validated | Not set up | — | — | Needs hosting |
+| Backups validated | Daily backup command in guides/go-live.md; restore never tested | — | — | Needs a server |
 | Monitoring / incident response | Not set up | — | — | |
 | Store accounts / signing | — | Not set up (F11) | Not set up (F11) | |
 | Founder approval | Not requested | Not requested | Not requested | |

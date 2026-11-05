@@ -1,4 +1,5 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
+import nodemailer, { Transporter } from 'nodemailer';
 import { PrismaService } from '../prisma.service';
 import { AppConfig, CONFIG } from '../config';
 
@@ -9,6 +10,8 @@ export interface OutgoingEmail {
 }
 
 export const MAILER = Symbol('MAILER');
+/** Optional override of the SMTP transport (used by tests). */
+export const SMTP_TRANSPORT = Symbol('SMTP_TRANSPORT');
 
 export interface Mailer {
   send(email: OutgoingEmail): Promise<void>;
@@ -36,4 +39,32 @@ export class SandboxMailer implements Mailer {
     await this.prisma.devOutboxEmail.create({ data: email });
     this.logger.log(`[sandbox] email stored for ${email.to}: ${email.subject}`);
   }
+}
+
+/**
+ * REAL EMAIL ADAPTER — sends through the SMTP service set in SMTP_URL.
+ * Works with any transactional email provider that offers SMTP.
+ * The recipient address is never written to logs.
+ */
+@Injectable()
+export class SmtpMailer implements Mailer {
+  private readonly logger = new Logger('SmtpMailer');
+  private readonly transport: Transporter;
+  constructor(
+    @Inject(CONFIG) private readonly config: AppConfig,
+    @Optional() @Inject(SMTP_TRANSPORT) transport?: Transporter,
+  ) {
+    if (!config.SMTP_URL || !config.EMAIL_FROM) throw new Error('SmtpMailer needs SMTP_URL and EMAIL_FROM.');
+    this.transport = transport ?? nodemailer.createTransport(config.SMTP_URL);
+  }
+
+  async send(email: OutgoingEmail): Promise<void> {
+    await this.transport.sendMail({ from: this.config.EMAIL_FROM, to: email.to, subject: email.subject, text: email.body });
+    this.logger.log(`email sent: ${email.subject}`);
+  }
+}
+
+/** Chooses the real adapter when SMTP is configured, otherwise the sandbox. */
+export function mailerFor(config: AppConfig) {
+  return config.realEmail ? SmtpMailer : SandboxMailer;
 }

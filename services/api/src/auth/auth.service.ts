@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Logger,
   ForbiddenException,
   Inject,
   Injectable,
@@ -31,6 +32,7 @@ export interface ClientInfo {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger('AuthService');
   constructor(
     @Inject(PrismaService) private readonly prisma: PrismaService,
     @Inject(AuditService) private readonly audit: AuditService,
@@ -68,7 +70,13 @@ export class AuthService {
       include: { roles: true },
     });
     await this.audit.record({ actorId: user.id, action: 'auth.register', targetType: 'User', targetId: user.id, ipAddress: client.ip, metadata: { roles } });
-    await this.sendVerificationEmail(user);
+    try {
+      await this.sendVerificationEmail(user);
+    } catch (err) {
+      // The account exists either way. Failing here would make a retry say "email already used";
+      // the member can ask for a new link from the account page ("resend confirmation").
+      this.logger.error(`verification email failed after registration: ${err instanceof Error ? err.message : err}`);
+    }
     const token = await this.createSession(user.id, 'member', client);
     return { user, token };
   }

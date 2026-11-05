@@ -65,3 +65,22 @@ jobs:
           name: playwright-report
           path: apps/web/playwright-report
           retention-days: 7
+
+  server-images:
+    # Proves the production container images still build. Nothing is pushed or deployed.
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build API, website and admin images
+        run: |
+          docker build --target api   -t humanlift-api .
+          docker build --target web   -t humanlift-web --build-arg SITE_URL=https://example.org .
+          docker build --target admin -t humanlift-admin .
+      - name: Check the deployment file is valid
+        working-directory: deploy
+        run: |
+          cp .env.example .env
+          sed -i 's/^POSTGRES_PASSWORD=/POSTGRES_PASSWORD=ci/;s/^MFA_ENCRYPTION_KEY=/MFA_ENCRYPTION_KEY=ci/;s#^SMTP_URL=#SMTP_URL=smtp://ci#' .env
+          docker compose config -q
+          docker run --rm -e DOMAIN=example.org -v "$PWD/Caddyfile:/etc/caddy/Caddyfile:ro" caddy:2 caddy validate --config /etc/caddy/Caddyfile

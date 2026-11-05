@@ -47,6 +47,28 @@ Note: the server log prints `Error: Internal: NoFallbackError` during the 404 te
 
 First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42107799254)): install, audit, migrations, API tests and builds passed; **1 of 44 browser tests FAILED**. The admin test expected a contact message that another test creates later; on GitHub the tests ran in a different order. Fix: the admin test now sends its own message first. After the fix, the full browser suite was re-run locally in CI mode on a database that already held API-test data: **44 passed**. GitHub re-run on commit d9d6a86 ([run 42111653135](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42111653135)): **passed**.
 
+## Run 2026-11-05 (evening) — Production setup
+
+**Environment:** same cloud container, Docker 29.9.2. Images built from a copy of `Dockerfile` that only adds this sandbox's network proxy settings (the sandbox blocks direct internet from containers). Local PostgreSQL 16 on a fresh database. A local test mail server (aiosmtpd) stood in for a real email provider. Synthetic `@example.test` addresses only.
+
+| Check | Result |
+|---|---|
+| API tests (`pnpm --filter @humanlift/api test`) | **VERIFIED: 43 passed** (new: empty email settings count as not set; production/staging refuse to start without SMTP; SMTP adapter sends from the configured sender; server boots with real email on; registration still succeeds when the email service is down) |
+| `pnpm audit --prod` after adding the email library | **VERIFIED: no known vulnerabilities** (the first version picked, nodemailer 7, had 20 advisories and was replaced by 10.3.1) |
+| `docker build` targets api, web, admin | **VERIFIED** |
+| API container on a fresh database: migrations applied, 15 countries seeded, starts in production mode | **VERIFIED** |
+| Website `/en` and admin `/login` return 200 from their containers; robots.txt allows indexing in production | **VERIFIED** |
+| Sign-up through the website proxy in French: HTTP 201, cookie `HttpOnly; Secure; SameSite=Lax`, French confirmation email delivered over SMTP with the right sender | **VERIFIED** |
+| Email confirmation link: page loads, confirmation recorded in the database | **VERIFIED** |
+| Sandbox outbox route in production | **VERIFIED: 404** |
+| Mobile-style sign-up (header `X-HumanLift-Client: mobile`): 201, no cookie, Bearer token accepted | **VERIFIED** |
+| Super-admin creation inside the container; staff sign-in through the admin app asks for authenticator setup | **VERIFIED** |
+| `docker compose config` on `deploy/docker-compose.yml` | **VERIFIED** |
+| Caddy HTTPS config (`caddy validate`) and certificates | **NOT TESTED** here: Docker Hub rate-limited this sandbox. Added to the GitHub check `server-images`; real certificates can only be tested on a server with a domain |
+| On a real server with a real email provider | **NOT TESTED** (no server or accounts yet) |
+
+**Bugs found and fixed by this run:** (1) the server could not start with real email on (dependency wiring), which a unit test had missed; a start-up test now covers it. (2) if the email service failed during sign-up, the account was created but the person saw an error; sign-up now succeeds and the failure is logged.
+
 ## Run 2026-11-05 — Mobile app (Flutter)
 
 **Environment:** same cloud container, Flutter 3.47.7 / Dart 3.13, Linux. No Android SDK (download blocked here), no macOS.

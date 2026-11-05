@@ -4,7 +4,7 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppConfig, CONFIG } from './config';
 import { PrismaService } from './prisma.service';
 import { AuditService } from './audit/audit.service';
-import { MAILER, SandboxMailer } from './mail/mailer';
+import { MAILER, mailerFor } from './mail/mailer';
 import { AuthService } from './auth/auth.service';
 import { AuthController } from './auth/auth.controller';
 import { MemberGuard, StaffGuard, StaffPasswordGuard } from './auth/guards';
@@ -27,8 +27,8 @@ export class AppModule {
         { provide: APP_GUARD, useClass: ThrottlerGuard },
         PrismaService,
         AuditService,
-        // Swap for a real email provider adapter in staging/production.
-        { provide: MAILER, useClass: SandboxMailer },
+        // Real SMTP delivery when SMTP_URL is set (required in staging/production), sandbox outbox otherwise.
+        { provide: MAILER, useClass: mailerFor(config) },
         AuthService,
         MemberGuard,
         StaffGuard,

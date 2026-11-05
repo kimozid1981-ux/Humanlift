@@ -1,0 +1,18 @@
+# HTTPS certificates are requested automatically for these three names.
+# Point all three DNS records at this server before starting.
+
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:3000
+}
+
+admin.{$DOMAIN} {
+	encode gzip
+	reverse_proxy admin:3001
+}
+
+# Used by the mobile app. Browsers use the website's own /api proxy instead.
+api.{$DOMAIN} {
+	encode gzip
+	reverse_proxy api:4000
+}

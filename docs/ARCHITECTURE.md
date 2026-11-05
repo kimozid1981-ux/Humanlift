@@ -21,7 +21,7 @@ Phone   ──► apps/mobile (Flutter, Android + iOS) ─ Bearer ────�
 - **Validation:** every request body is validated with zod (`common/zod.pipe.ts`) and returns field-level errors.
 - **Database rules in SQL** (`prisma/migrations/*_init/migration.sql`): append-only `AuditLog` trigger; `Country` approval requires legal + payment sign-off; lower-case emails.
 - **i18n:** `apps/web/src/i18n/` — `en.ts`, `fr.ts`; all eight launch languages declared in `config.ts`, Arabic marked RTL; `<html lang dir>` set per locale; hreflang alternates and sitemap.
-- **Provider adapters:** `Mailer` interface with `SandboxMailer`. Identity, payment, storage adapters follow the same pattern in later milestones.
+- **Provider adapters:** `Mailer` interface with `SandboxMailer` (dev/test) and `SmtpMailer` (any SMTP email service; required in staging/production, the API refuses to start without it). Identity, payment, storage adapters follow the same pattern in later milestones.
 
 ## Environments
 
@@ -29,7 +29,7 @@ Phone   ──► apps/mobile (Flutter, Android + iOS) ─ Bearer ────�
 |---|---|
 | development (local) | Working — see guides/local-development.md |
 | test (CI) | `.github/workflows/ci.yml` (API + web + admin) and `.github/workflows/mobile.yml` (Flutter checks, Android test APK; iPhone build on demand) |
-| staging / production | Do not exist. Need a hosting decision and founder approval |
+| staging / production | Ready to run, not running. `Dockerfile` (targets api, web, admin) and `deploy/` (Docker Compose with PostgreSQL and Caddy for automatic HTTPS on `DOMAIN`, `admin.DOMAIN`, `api.DOMAIN`). Steps: guides/go-live.md. Needs a server and founder approval |
 
 ## Known technical debt
 
