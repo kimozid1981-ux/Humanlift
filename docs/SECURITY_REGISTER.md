@@ -25,5 +25,7 @@ Argon2id password hashing · hashed session tokens · HttpOnly/SameSite cookies 
 | S12 | Mobile session token can be read on a rooted/jailbroken phone despite Keychain/Keystore | Medium | Consider device-integrity checks (Play Integrity, App Attest) before real money |
 | S13 | iPhone: screenshots are not blocked (only the app-switcher preview is covered) | Low–Medium | Review when sensitive screens (documents, addresses) are added |
 | S14 | Mobile app has no certificate pinning | Low–Medium | Decide with the hosting choice; pinning adds rotation risk |
+| S15 | Request text is free text written by applicants and could contain personal or sensitive details once public | Medium | Staff review before publishing (manual today); form warns not to include address, ID or health details; automated detection later |
+| S16 | Requests can be approved before identity, address and bill verification exist (Milestone 2) | High (before any country opens) | Publication is blocked until a country has legal + payment sign-off; do not approve a country before verification is built (F14) |
 
 **A scanner reporting no findings is not a security audit.** Independent expert review is required before production.

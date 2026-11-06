@@ -6,7 +6,7 @@ import { Alert, Field } from '@/components/Field';
 import { ENABLED_LOCALES, formatDate, LOCALE_NAMES } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/en';
 
-type T = Pick<Dictionary, 'account' | 'auth' | 'common'>;
+type T = Pick<Dictionary, 'account' | 'auth' | 'common' | 'helpRequests'>;
 type User = { id: string; email: string; displayName: string; locale: string; countryCode: string | null; emailVerified: boolean; roles: string[] };
 type DataRequest = { id: string; type: string; status: string; createdAt: string; resolution?: string | null };
 
@@ -124,7 +124,12 @@ export function AccountApp({ locale, t }: { locale: string; t: T }) {
         {!user.roles.includes('APPLICANT') && <button type="button" className="btn btn-secondary" onClick={() => addRole('APPLICANT')}>{a.addApplicant}</button>}
         {!user.roles.includes('DONOR') && <button type="button" className="btn btn-secondary" onClick={() => addRole('DONOR')}>{a.addDonor}</button>}
         <h3>{a.nextStepsTitle}</h3>
-        {user.roles.includes('APPLICANT') && <p>{a.nextApplicant}</p>}
+        {user.roles.includes('APPLICANT') && (
+          <>
+            <p>{a.nextApplicant}</p>
+            <p><a className="btn" href={`/${locale}/account/requests`} data-testid="my-requests-link">{t.helpRequests.myRequestsLink}</a></p>
+          </>
+        )}
         {user.roles.includes('DONOR') && <p>{a.nextDonor}</p>}
       </section>
 

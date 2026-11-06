@@ -47,6 +47,19 @@ Note: the server log prints `Error: Internal: NoFallbackError` during the 404 te
 
 First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42107799254)): install, audit, migrations, API tests and builds passed; **1 of 44 browser tests FAILED**. The admin test expected a contact message that another test creates later; on GitHub the tests ran in a different order. Fix: the admin test now sends its own message first. After the fix, the full browser suite was re-run locally in CI mode on a database that already held API-test data: **44 passed**. GitHub re-run on commit d9d6a86 ([run 42111653135](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42111653135)): **passed**.
 
+## Run 2026-11-06 — Help requests (test mode, no money)
+
+**Environment:** same cloud container, local PostgreSQL 16, Chromium from Playwright. Synthetic data only. A fictional country "ZZ / Testland" with test-only sign-off is used by the API tests to check publication, then switched back to NOT_RESEARCHED.
+
+| Check | Result |
+|---|---|
+| API tests | **VERIFIED: 53 passed** (10 new for requests: only applicants create; drafts private; amount, currency, healthcare-off, display name and deadline validation; max 3 open; confirmed email to submit; drafts-only editing; full review with reasons; publication refused without consent and without an approved country; publication in an approved country hides the applicant's identity; withdrawing consent takes it offline; nobody reviews their own request; history rows cannot be edited; database refuses public status without consent and funding above the amount; requests in the data export) |
+| Mutation check | **VERIFIED:** with the country check deliberately switched off, the publication test failed as it should; check restored |
+| Browser tests (`CI=true pnpm test:e2e`) | **VERIFIED: 46 passed** (2 new: English journey draft → review → sent back with reason → resubmit → approve → publish refused without consent → consent → publish refused for an unapproved country → nothing public; French form labels and amount error, and a donor is told to add the applicant role first) |
+| Typecheck (all packages) | **VERIFIED** |
+| Admin queue and public request pages in a real browser beyond these tests | **NOT TESTED** manually |
+| Mobile app request screens | **NOT BUILT** yet (web only for now) |
+
 ## Run 2026-11-05 (evening) — Production setup
 
 **Environment:** same cloud container, Docker 29.9.2. Images built from a copy of `Dockerfile` that only adds this sandbox's network proxy settings (the sandbox blocks direct internet from containers). Local PostgreSQL 16 on a fresh database. A local test mail server (aiosmtpd) stood in for a real email provider. Synthetic `@example.test` addresses only.

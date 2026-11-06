@@ -4,7 +4,7 @@
 
 | Gate | Web | Android | iOS | Evidence / note |
 |---|---|---|---|---|
-| Core journeys working | Partial (accounts only) | Accounts only; automated screen tests pass; not tried on a device | Same as Android; no iPhone build run yet | TEST_RESULTS.md |
+| Core journeys working | Accounts and help requests (no verification, no money) | Accounts only; automated screen tests pass; not tried on a device | Same as Android; no iPhone build run yet | TEST_RESULTS.md |
 | No critical security vulnerabilities | Dependency audit clean | — | — | No pen test yet |
 | Payments reconcile | N/A (no payments) | — | — | |
 | Sensitive data not public | Verified for what exists | Token in Keystore, no backups, screenshots blocked | Token in Keychain, app-switcher cover | No documents stored yet |

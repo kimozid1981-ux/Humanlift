@@ -58,3 +58,25 @@ export async function registerViaUi(page: Page, email: string, opts: { applicant
   await page.getByRole('button', { name: opts.locale === 'fr' ? 'Créer le compte' : 'Create account' }).click();
   await expect(page).toHaveURL(new RegExp(`/${opts.locale ?? 'en'}/account`));
 }
+
+/** Creates a super administrator and signs in to the admin dashboard, including authenticator setup. */
+export async function signInNewAdmin(page: Page, adminUrl = 'http://localhost:3001') {
+  const email = uniqueEmail('admin');
+  const password = createSuperAdmin(email);
+  await page.goto(`${adminUrl}/login`);
+  await page.getByLabel('Email').fill(email);
+  await page.getByLabel('Password').fill(password);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('heading', { name: 'Set up your authenticator app' })).toBeVisible();
+  const key = (await page.getByTestId('manual-key').textContent())!.trim();
+  await page.getByLabel('6-digit code').fill(totp(key));
+  await page.getByRole('button', { name: 'Verify' }).click();
+  await expect(page.getByRole('heading', { name: 'Overview' })).toBeVisible();
+}
+
+/** Confirms a member's email through the link in the sandbox outbox. */
+export async function confirmEmail(page: Page, request: APIRequestContext, email: string, locale: 'en' | 'fr' = 'en') {
+  const mail = await latestEmail(request, email);
+  await page.goto(linkIn(mail.body));
+  await page.getByRole('button', { name: locale === 'fr' ? 'Confirmer votre adresse e-mail' : 'Confirm your email' }).click();
+}

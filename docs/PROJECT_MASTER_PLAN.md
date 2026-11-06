@@ -9,7 +9,7 @@
 | M0 Audit | Phase 0, 1 | Done — `docs/audit/` |
 | M1 Foundation | Phases 2, 3, 4, part of 10 and 13 | Built, in review |
 | M2 Verification | Phases 5, 6 | Not started |
-| M3 Requests | Phases 7, 8 | Not started |
+| M3 Requests | Phases 7, 8 | First part built (test mode): request drafts, review queue, consent, publication gate, public list. Evidence upload and funding states wait for M2 and M4 |
 | M4 Payments | Phase 9 | Not started (sandbox only when started) |
 | M5 Mobile | Phase 11 | Blocked: Flutter not installed here; iOS needs macOS + Xcode |
 | — | Phase 12 AI assistance | After M2 (needs documents) |

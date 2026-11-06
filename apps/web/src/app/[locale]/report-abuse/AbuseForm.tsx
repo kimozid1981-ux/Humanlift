@@ -7,7 +7,7 @@ import type { Dictionary } from '@/i18n/en';
 
 type T = Pick<Dictionary, 'abuse' | 'auth' | 'common' | 'contact'>;
 
-export function AbuseForm({ t }: { t: T }) {
+export function AbuseForm({ t, targetUrl }: { t: T; targetUrl?: string }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'done' | 'error' | 'limited'>('idle');
 
@@ -36,7 +36,7 @@ export function AbuseForm({ t }: { t: T }) {
           <option key={k} value={k}>{v}</option>
         ))}
       </Field>
-      <Field label={`${t.abuse.link} (${t.common.optional})`} name="targetUrl" type="url" inputMode="url" />
+      <Field label={`${t.abuse.link} (${t.common.optional})`} name="targetUrl" type="url" inputMode="url" defaultValue={targetUrl} />
       <Field label={t.abuse.description} name="description" multiline required hint={t.contact.messageHint} error={errors.description ? t.contact.messageHint : undefined} />
       <Field label={`${t.abuse.email} (${t.common.optional})`} name="reporterEmail" type="email" autoComplete="email" error={errors.reporterEmail ? t.auth.errors.email : undefined} />
       <Honeypot />

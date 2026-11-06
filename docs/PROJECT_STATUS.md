@@ -15,11 +15,13 @@
 
 ## What a person can do today (locally / in a test environment)
 
+**New:** applicants can prepare a help request, send it for review, read the team's feedback, agree or not to public visibility, and cancel. Staff can review, send back, approve, reject, suspend and publish. Publishing only works in a country approved for beta or launch, and none is approved, so nothing is public. No verification and no money yet.
+
 Register (applicant, donor or both), confirm email (sandbox outbox), sign in/out, reset password, edit profile and language, add a role, download personal data, request access/correction/deletion, send a contact message, report abuse, view country status and transparency page. Staff: sign in with mandatory authenticator-app MFA, view users, change roles (super admin), suspend/reactivate users, handle messages, abuse reports and data requests, edit countries (approval blocked without sign-off), read the append-only audit log.
 
 ## Not built yet (NOT TESTED because it does not exist)
 
-Identity/address verification, document upload, OCR, assistance requests, donor discovery, payments, ledger, notifications other than sandbox email, AI features, store releases of the mobile app, the 1,000-persona evaluator harness, a running staging or production server, monitoring, tested backups.
+Identity/address verification, document upload, OCR, evidence for requests, donations, payments, ledger, notifications other than sandbox email, AI features, store releases of the mobile app, the 1,000-persona evaluator harness, a running staging or production server, monitoring, tested backups.
 
 ## Blockers
 

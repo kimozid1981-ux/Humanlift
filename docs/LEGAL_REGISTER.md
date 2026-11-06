@@ -12,5 +12,6 @@
 | L6 | EU | European Accessibility Act | Not yet re-read from official source | Applies from 28 June 2025 to certain services | M | Is HumanLift in scope? | Lawyer |
 | L7 | All | Tax treatment of gifts to individuals | Not researched | Likely no donor tax relief unlike registered charities | L | Per-country rules; recipient reporting | Tax adviser |
 | L8 | All | Digital Services Act duties | Not researched | Hosting user content may bring notice-and-action duties | L | Size thresholds | Lawyer |
+| L9 | EU | Publishing a person's request (GDPR legal basis, consent wording) | Built as explicit, withdrawable consent per request; wording not reviewed | Applicants may describe hardship in their own words, which can reveal sensitive facts | H | Is consent the right basis? Is the consent text adequate? Retention after closing? | Lawyer / DPO |
 
 Countries in scope of the consolidated brief (FR, BE, DE, ES, PT, NL, LU, UK, US, CA) are all `NOT_RESEARCHED` in the system except France (`RESEARCH_IN_PROGRESS`). The approval checklist is enforced in code: a country cannot reach `APPROVED_FOR_BETA`/`APPROVED_FOR_LAUNCH` without named legal and payment sign-off and document references.

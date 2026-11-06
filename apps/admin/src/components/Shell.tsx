@@ -12,6 +12,7 @@ export const useStaff = () => useContext(Ctx)!;
 const NAV: { href: string; label: string; roles: string[] }[] = [
   { href: '/', label: 'Overview', roles: [] },
   { href: '/users', label: 'Users and roles', roles: ['ADMINISTRATOR', 'SUPER_ADMINISTRATOR', 'COMPLIANCE_SPECIALIST'] },
+  { href: '/requests', label: 'Help requests', roles: ['VERIFICATION_SPECIALIST', 'COMPLIANCE_SPECIALIST', 'ADMINISTRATOR', 'SUPER_ADMINISTRATOR'] },
   { href: '/reports', label: 'Abuse reports', roles: ['VERIFICATION_SPECIALIST', 'COMPLIANCE_SPECIALIST', 'ADMINISTRATOR', 'SUPER_ADMINISTRATOR'] },
   { href: '/messages', label: 'Contact messages', roles: ['ADMINISTRATOR', 'SUPER_ADMINISTRATOR', 'COMPLIANCE_SPECIALIST'] },
   { href: '/data-requests', label: 'Data requests', roles: ['COMPLIANCE_SPECIALIST', 'ADMINISTRATOR', 'SUPER_ADMINISTRATOR'] },
