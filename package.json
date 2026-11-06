@@ -1,0 +1,13 @@
+{
+  "name": "humanlift",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "pnpm -r --parallel --filter ./services/api --filter ./apps/web --filter ./apps/admin dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @humanlift/api test",
+    "test:e2e": "pnpm --filter @humanlift/web test:e2e"
+  }
+}

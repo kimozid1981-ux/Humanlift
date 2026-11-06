@@ -1,0 +1,68 @@
+# Runs all of HumanLift on one server: database, API, website, admin dashboard,
+# and Caddy, which gets HTTPS certificates automatically.
+# Usage (on the server, in this folder):  docker compose up -d --build
+# Settings come from deploy/.env (copy .env.example, never commit it).
+
+name: humanlift
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: humanlift
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in deploy/.env}
+      POSTGRES_DB: humanlift
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U humanlift -d humanlift"]
+      interval: 5s
+      retries: 20
+
+  api:
+    build: { context: .., target: api }
+    restart: unless-stopped
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DATABASE_URL: postgresql://humanlift:${POSTGRES_PASSWORD}@db:5432/humanlift
+      WEB_BASE_URL: https://${DOMAIN:?set DOMAIN in deploy/.env}
+      ADMIN_BASE_URL: https://admin.${DOMAIN}
+      MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY:?set MFA_ENCRYPTION_KEY in deploy/.env}
+      SMTP_URL: ${SMTP_URL:?set SMTP_URL in deploy/.env}
+      EMAIL_FROM: ${EMAIL_FROM:?set EMAIL_FROM in deploy/.env}
+      AUTH_RATE_LIMIT: ${AUTH_RATE_LIMIT:-10}
+      # Requests arrive through Caddy or the website container on the private network.
+      TRUST_PROXY: uniquelocal
+
+  web:
+    build:
+      context: ..
+      target: web
+      args: { SITE_URL: "https://${DOMAIN}", PUBLIC_ENVIRONMENT: "${APP_ENV:-production}" }
+    restart: unless-stopped
+    depends_on: [api]
+
+  admin:
+    build:
+      context: ..
+      target: admin
+      args: { PUBLIC_ENVIRONMENT: "${APP_ENV:-production}" }
+    restart: unless-stopped
+    depends_on: [api]
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    depends_on: [web, admin, api]
+
+volumes:
+  db-data:
+  caddy-data:
