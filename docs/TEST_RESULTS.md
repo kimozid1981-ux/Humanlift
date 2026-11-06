@@ -77,7 +77,7 @@ First GitHub run (2026-11-05, [run 42107799254](https://github.com/kimozid1981-u
 | Mobile-style sign-up (header `X-HumanLift-Client: mobile`): 201, no cookie, Bearer token accepted | **VERIFIED** |
 | Super-admin creation inside the container; staff sign-in through the admin app asks for authenticator setup | **VERIFIED** |
 | `docker compose config` on `deploy/docker-compose.yml` | **VERIFIED** |
-| Caddy HTTPS config (`caddy validate`) and certificates | **NOT TESTED** here: Docker Hub rate-limited this sandbox. Added to the GitHub check `server-images`; real certificates can only be tested on a server with a domain |
+| Caddy HTTPS config (`caddy validate`) and certificates | Config: **VERIFIED on GitHub** by the `server-images` check on commit 781b483 ([run 42141530991](https://github.com/kimozid1981-ux/Humanlift/actions/runs/42141530991)), which also built the three production images and validated the Compose file. Real certificates: **NOT TESTED** (needs a server with a domain) |
 | On a real server with a real email provider | **NOT TESTED** (no server or accounts yet) |
 
 **Bugs found and fixed by this run:** (1) the server could not start with real email on (dependency wiring), which a unit test had missed; a start-up test now covers it. (2) if the email service failed during sign-up, the account was created but the person saw an error; sign-up now succeeds and the failure is logged.
